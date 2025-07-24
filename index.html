@@ -1,0 +1,246 @@
+=<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Greenside High Parent Booking</title>
+  <style>
+    /* Basic reset */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    /* Navbar */
+    nav {
+      background-color: #00dc37;
+      color: white;
+      padding: 1rem 2rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 130px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    /* Container */
+    .container {
+      max-width: 480px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      color: #004080;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: #004080;
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #004080;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover:not(:disabled) {
+      background-color: #003366;
+    }
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    #message {
+      margin-top: 1rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    #message.success {
+      color: green;
+    }
+    #message.error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    Greenside High Parent Booking
+  </nav>
+
+  <div class="container">
+    <h1>Book a Parent-Teacher Slot</h1>
+    <form id="bookingForm">
+      <label for="parentName">Parent Name:</label>
+      <input type="text" id="parentName" name="parentName" placeholder="Your full name" required />
+
+      <label for="bookingSlot">Select a Slot:</label>
+      <select id="bookingSlot" name="bookingSlot" required>
+        <option value="">-- Select a slot --</option>
+        <!-- April 29 slots -->
+        <option value="29-16:00">April 29, 4:00 PM</option>
+        <option value="29-16:30">April 29, 4:30 PM</option>
+        <option value="29-17:00">April 29, 5:00 PM</option>
+        <option value="29-17:30">April 29, 5:30 PM</option>
+        <option value="29-18:00">April 29, 6:00 PM</option>
+        <option value="29-18:30">April 29, 6:30 PM</option>
+        <option value="29-19:00">April 29, 7:00 PM</option>
+        <option value="29-19:30">April 29, 7:30 PM</option>
+        <option value="29-20:00">April 29, 8:00 PM</option>
+
+        <!-- April 31 slots -->
+        <option value="31-16:00">April 31, 4:00 PM</option>
+        <option value="31-16:30">April 31, 4:30 PM</option>
+        <option value="31-17:00">April 31, 5:00 PM</option>
+        <option value="31-17:30">April 31, 5:30 PM</option>
+        <option value="31-18:00">April 31, 6:00 PM</option>
+        <option value="31-18:30">April 31, 6:30 PM</option>
+        <option value="31-19:00">April 31, 7:00 PM</option>
+        <option value="31-19:30">April 31, 7:30 PM</option>
+        <option value="31-20:00">April 31, 8:00 PM</option>
+      </select>
+
+      <button type="submit">Book Slot</button>
+    </form>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzVCra3o7EVjnEUek_HeHyNIGBgbll5aqTfTr0-6FhUp3rflLhsVGnIHXd1tZiN9-Wm/exec';
+
+    const form = document.getElementById('bookingForm');
+    const message = document.getElementById('message');
+    const bookingSlot = document.getElementById('bookingSlot');
+    const parentName = document.getElementById('parentName');
+    const submitButton = form.querySelector('button');
+
+    let bookedSlots = [];
+
+    // Fetch booked slots and disable them
+    fetch(`${scriptURL}?action=getBookedDates`)
+      .then(response => response.json())
+      .then(data => {
+        bookedSlots = data;
+        for (const option of bookingSlot.options) {
+          if (bookedSlots.includes(option.value)) {
+            option.disabled = true;
+            option.textContent += ' (Booked)';
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching booked slots:', err);
+        message.textContent = 'Could not load booked slots.';
+        message.className = 'error';
+      });
+
+    bookingSlot.addEventListener('change', () => {
+      message.textContent = '';
+      message.className = '';
+      submitButton.disabled = false;
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const selectedSlot = bookingSlot.value;
+      const name = parentName.value.trim();
+
+      if (!name) {
+        message.textContent = 'Please enter your name.';
+        message.className = 'error';
+        return;
+      }
+
+      if (!selectedSlot) {
+        message.textContent = 'Please select a slot.';
+        message.className = 'error';
+        return;
+      }
+
+      if (bookedSlots.includes(selectedSlot)) {
+        message.textContent = 'Sorry, this slot is already booked.';
+        message.className = 'error';
+        submitButton.disabled = true;
+        return;
+      }
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: new URLSearchParams({
+          parentName: name,
+          date: selectedSlot
+        })
+      })
+        .then(res => res.text())
+        .then(response => {
+          if (response === 'SUCCESS') {
+            message.textContent = 'Booking confirmed! Thank you.';
+            message.className = 'success';
+
+            bookedSlots.push(selectedSlot);
+            const option = bookingSlot.querySelector(`option[value="${selectedSlot}"]`);
+            if (option) {
+              option.disabled = true;
+              option.textContent += ' (Booked)';
+            }
+
+            form.reset();
+            submitButton.disabled = false;
+          } else if (response === 'BOOKED') {
+            message.textContent = 'This slot was just booked by someone else.';
+            message.className = 'error';
+            submitButton.disabled = true;
+          } else {
+            message.textContent = 'Error: ' + response;
+            message.className = 'error';
+          }
+        })
+        .catch(err => {
+          console.error('Error submitting booking:', err);
+          message.textContent = 'Failed to submit booking. Please try again.';
+          message.className = 'error';
+        });
+    });
+  </script>
+</body>
+</html>
