@@ -28,6 +28,31 @@
       margin-bottom: 130px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+    label[for="parentEmail"] {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+input[type="email"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+input[type="email"]:focus {
+  border-color: #004080;
+  outline: none;
+  background-color: #fff;
+  color: #000;
+}
+
     nav a {
       color: white;
       text-decoration: none;
@@ -112,6 +137,11 @@
     <form id="bookingForm">
       <label for="parentName">Parent Name:</label>
       <input type="text" id="parentName" name="parentName" placeholder="Your full name" required />
+
+      <label for="parentEmail">Parent Email:</label>
+<input type="email" id="parentEmail" name="email" required />
+
+
 
       <label for="bookingSlot">Select a Slot:</label>
       <select id="bookingSlot" name="bookingSlot" required>
@@ -241,6 +271,24 @@
           message.className = 'error';
         });
     });
+
+    MailApp.sendEmail({
+  to: parentEmail,
+  subject: 'Booking Confirmation - Greenside High Parent Meeting',
+  htmlBody: `
+    <p>Dear ${parentName},</p>
+    <p>Thank you for booking a parent meeting slot on ${formatDateTime(date)}.</p>
+    <p>We look forward to seeing you then!</p>
+  `
+});
+
+    body: new URLSearchParams({
+  parentName: name,
+  email: document.getElementById('parentEmail').value.trim(),
+  date: selectedSlot
+})
+
   </script>
 </body>
 </html>
+
